@@ -1,0 +1,22 @@
+{
+  "timers": [
+    {
+      "name": "timerOne",
+      "minutes": 2,
+      "seconds": 30,
+      "isActive": false
+    },
+    {
+      "name": "timerTwo",
+      "minutes": 2,
+      "seconds": 30,
+      "isActive": false
+    },
+    {
+      "name": "timerFour",
+      "minutes": 2,
+      "seconds": 30,
+      "isActive": false
+    }
+  ]
+}

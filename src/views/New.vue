@@ -1,21 +1,52 @@
 <template>
   <div class="newTimerContainer">
-      <form>
+      <form @submit.prevent="handleSubmit">
+        <h2>Create a new timer</h2>
         <label>Name: </label>
-        <input type="text">
+        <input v-model="name" type="text" required>
         <div class="timeForm">
-          <label>minutes: </label>
-          <input type="number" max="60">
+          <label>Minutes: </label>
+          <input v-model="minutes" type="number" max="60" min="0" required>
           <label>Seconds: </label>
-          <input type="number" max="3">
+          <input v-model="seconds" type="number" max="59" min="0" required>
         </div>
+        <button type="submit">Create timer</button>
+        <button @click.prevent="handleCancel" >Cancel</button>
       </form>
   </div>
 </template>
 
 <script>
-export default {
+import {useRouter} from 'vue-router'
+import {ref} from 'vue'
+import {projectFirestore} from '../firebase/config'
 
+export default {
+  setup(){
+
+    const name = ref(null)
+    const minutes = ref(null)
+    const seconds = ref(null)
+    const isActive = ref(false)
+    
+    const router = useRouter()
+
+    const handleCancel = () => {
+      router.push('/')
+    }
+
+    const handleSubmit = async () => {
+      let data = { 
+        name: name.value,
+        minutes: minutes.value,
+        seconds: seconds.value,
+        isActive: isActive.value,
+      }
+      const res = await projectFirestore.collection('timers').add(data)
+      router.push('/')
+    }
+    return { handleCancel, handleSubmit, name, minutes, seconds, isActive }
+  }
 }
 </script>
 
@@ -31,16 +62,18 @@ export default {
     text-align: left;
 }
 
- .timeForm input {
-   font-size: 20px;
+ .newTimerContainer input {
    padding: 7px 5px;
-   width: 50px;
    text-align: center;
    background: #FFF;
    border: solid #E0E0E0 2px;
    border-radius: 5px;
    font-family: monospace;
    margin-right: 15px;
+ }
+
+ .timeForm input {
+   width: 50px;
  }
  
 
@@ -52,6 +85,8 @@ export default {
    display: flex;
    align-items: center;
    width: 100%;
+   margin-top: 20px;
+   margin-bottom: 40px;
  }
 
 </style>

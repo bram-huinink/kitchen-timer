@@ -8,28 +8,38 @@
         :key="timer.name"
         :timer="timer"
         @delete="handleDelete"
-        @start="handleStart"
         :ref="setRef"
         />
     </div>
 </template>
 
 <script>
-import { ref } from 'vue'
 import Timer from './Timer.vue'
 import { projectFirestore } from '../firebase/config'
+import {ref} from 'vue'
 
 export default {
     components: {Timer},
-    setup(context){
+    setup(){
+        // variable where the firebase data will be stored in
         const timers = ref([])
+
+        // if there's an error, it will be stored in here
         const error = ref(null)
 
-        const timerRefs = []
+        // variable where an array with references to the timers will be stored in
+        const timerRefs = ref([])
+
+        // function that puts reference in the array
         const setRef = (el) => {
-            timerRefs.push(el)
+            if(!timerRefs.value.includes(el)){
+                if(el){
+                    timerRefs.value.push(el)
+                }
+            }
         }
 
+        // function that fetches the data from firebase
         const load = async () => {
             try{
                 const res = await projectFirestore.collection('timers').get()
@@ -42,44 +52,60 @@ export default {
             }
         }
 
+        // runs when a delete event is emmited from a timer-child
         const handleDelete = (id) => {
+            // filters out the timer that is deleted
             timers.value = timers.value.filter((timer) => {
                 return timer.id !== id
             })
+
         }
 
-        const handleStart = (id) => {
-            console.log('handle start in timers.vue')
-        }
-
+        // stops all timers 
         const stopAll = () => {
-            timerRefs.forEach((item) => {
+            // goes through the array with refs to call the stopTimer method for each one
+            timerRefs.value.forEach((item) => {
+                // checks if the timer is active, if so it runs the method.
+                // this prevents that paused timers will be reset
                 if(item.timer.isActive) {
                     item.stopTimer()
                 }
             })
         }
 
+        // goes through the array with refs to call the startTimer method for each one
         const startAll = () => {
-            timerRefs.forEach((item) => {
-                if(!item.timer.isActive) {
-                    item.startTimer()
-                    console.log(item.timer.name)
-                }
+            timerRefs.value.forEach((item) => {
+                    if(!item.timer.isActive && item) {
+                        item.startTimer()
+                    }
             })
         }
-
+        
+        // stops all timers regardless of if they are paused or not
         const resetAll = () => {
-            timerRefs.forEach((item) => {
+            // goes through the array with refs to call the stopTimer method for each one
+            timerRefs.value.forEach((item) => {
                 if(item.timer.isActive) {
                     item.stopTimer()
                 }
             })
         }
+
 
     load()
 
-    return {timers, error, load, handleDelete, handleStart, stopAll, startAll, resetAll, timerRefs, setRef}
+    return {
+        timers, 
+        error, 
+        load, 
+        handleDelete, 
+        stopAll, 
+        startAll, 
+        resetAll, 
+        timerRefs, 
+        setRef, 
+        }
     }
 
 }

@@ -33,13 +33,23 @@ import{ref} from 'vue'
 export default {
     props: ['timer'],
     setup(props, context){
+        // calculates the amount of seconds the timer should run
         const totalTime = props.timer.minutes * 60 + props.timer.seconds
 
+        // calculates the amount of seconds the timer should run
         let timer = totalTime
+        
+        // variable where the interval will be stored in
         let interval = null
+
+        // bool for when the timer's alarm is on
         let isAlarm =  ref(false)
+
+        // bool for when the timer should be paused
         let isPaused = ref(false)
 
+
+        // alarm sound that loops
         let alarmSound = new Audio("https://www.mboxdrive.com/alarm_r.mp3")
         alarmSound.loop = true
 

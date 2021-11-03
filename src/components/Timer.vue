@@ -6,11 +6,22 @@
             <button v-if="timer.isActive" @click="resetAlarm">Stop alarm</button>
         </div>
         <div v-else>
-            <p>Time:</p>
+            <p v-if="timer.isActive">Timer running:</p>
+            <p v-else-if="isPaused" >Timer paused:</p>
+            <p v-else >Time:</p>
             <p class="time">{{ timer.minutes }}:{{ timer.seconds }}</p>
-            <button v-if="timer.isActive" @click="stopTimer">Stop timer</button>
-            <button v-else @click="startTimer">Start timer</button>
-            <button @click="deleteTimer">Delete</button>
+            <div v-if="timer.isActive">
+                <button @click="stopTimer">Stop timer</button>
+                <button @click="pauseTimer">Pause timer</button>
+            </div>
+            <div v-else-if="isPaused">
+                <button @click="stopTimer">Reset timer</button>
+                <button @click="startTimer">Continue timer</button>
+            </div>
+            <div v-else>
+                <button @click="startTimer">Start timer</button>
+                <button @click="deleteTimer">Delete</button>
+            </div>
         </div>
     </div>
 </template>
@@ -27,28 +38,48 @@ export default {
         let timer = totalTime
         let interval = null
         let isAlarm =  ref(false)
+        let isPaused = ref(false)
+
+        let alarmSound = new Audio("https://fsb.zobj.net/download/bSDeNKllQk-VDS7G_Z8l_xc6SkGP-nFvmrTOi5O0BPFSq1RmfmaL3nE67OezRSpiruKfg4WJa5J0YbLCKG016eiMQvuprVNVNOjOfFeO7SDuR_r2_F1LO9pO0-U0/?a=&c=72&f=alarm_r.mp3&special=1635941195-%2F869uf8IO9JW1Pkdi6%2BZlRbYFwI7AdQ%2Fexxf2V%2B9Xoo%3D")
+        alarmSound.loop = true
 
         const originalMinutes = props.timer.minutes
         const originalSeconds = props.timer.seconds
 
         const stopTimer = () => {
             clearInterval(interval)
+            isPaused.value = false
             props.timer.isActive = false
             props.timer.minutes = originalMinutes
             props.timer.seconds = originalSeconds
             timer = totalTime
+
+            if(isAlarm.value){
+                isAlarm.value = false
+                alarmSound.pause()
+                alarmSound.currentTime = 0
+            }
             console.log("timer gestopt")
         }
 
+        const pauseTimer = () => {
+            props.timer.isActive = false
+            isPaused.value = true
+            clearInterval(interval)
+        }
+
+
         const startTimer = () => {
+            isPaused.value = false
             context.emit('start', props.timer.id)
             props.timer.isActive = true
-        
+    
             interval = setInterval(() => {
             if (timer === 0) {
                 clearInterval(interval)
                 console.log('timer klaar')                
                 isAlarm.value = true
+                alarmSound.play()
             } else {
                 timer--
                 if(props.timer.seconds > 0) {
@@ -74,7 +105,11 @@ export default {
             isAlarm.value = false;
         }
 
-        return {deleteTimer, startTimer, stopTimer, isAlarm, resetAlarm}
+        const stopAlarm = () => {
+            console.log("dit moet alarm stoppen")
+        }
+
+        return {deleteTimer, startTimer, stopTimer, isAlarm, isPaused, alarmSound, resetAlarm, pauseTimer, stopAlarm}
     }
 }
 
@@ -83,11 +118,14 @@ export default {
 <style>
     .timerBlock {
           padding: 15px 30px;
-            background: #FFF;
-            border-radius: 25px;
-            border: solid #E0E0E0 2px;
-            text-align: center;
-            margin: 10px;
+        background: #FFF;
+        border-radius: 25px;
+        border: solid #E0E0E0 2px;
+        text-align: center;
+        margin: 10px;
+        box-sizing: border-box;
+        width: 350px;
+        height: 240px;
     }
 
     .timerBlock.active {

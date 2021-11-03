@@ -40,7 +40,7 @@ export default {
         let isAlarm =  ref(false)
         let isPaused = ref(false)
 
-        let alarmSound = new Audio("https://fsb.zobj.net/download/bSDeNKllQk-VDS7G_Z8l_xc6SkGP-nFvmrTOi5O0BPFSq1RmfmaL3nE67OezRSpiruKfg4WJa5J0YbLCKG016eiMQvuprVNVNOjOfFeO7SDuR_r2_F1LO9pO0-U0/?a=&c=72&f=alarm_r.mp3&special=1635941195-%2F869uf8IO9JW1Pkdi6%2BZlRbYFwI7AdQ%2Fexxf2V%2B9Xoo%3D")
+        let alarmSound = new Audio("https://www.mboxdrive.com/alarm_r.mp3")
         alarmSound.loop = true
 
         const originalMinutes = props.timer.minutes
@@ -105,11 +105,7 @@ export default {
             isAlarm.value = false;
         }
 
-        const stopAlarm = () => {
-            console.log("dit moet alarm stoppen")
-        }
-
-        return {deleteTimer, startTimer, stopTimer, isAlarm, isPaused, alarmSound, resetAlarm, pauseTimer, stopAlarm}
+        return {deleteTimer, startTimer, stopTimer, isAlarm, isPaused, alarmSound, resetAlarm, pauseTimer}
     }
 }
 

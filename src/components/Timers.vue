@@ -92,7 +92,7 @@ export default {
             })
         }
 
-
+    // runs the load function that gets the data from firebase
     load()
 
     return {

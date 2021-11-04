@@ -24,24 +24,33 @@ import {projectFirestore} from '../firebase/config'
 export default {
   setup(){
 
+    // creates variables where the data for the timer will be stored in
     const name = ref(null)
     const minutes = ref(null)
     const seconds = ref(null)
     
+    // variable that can be used to redirect the user to a different route
     const router = useRouter()
 
+    // cancels the creating a new timer by going back to the home route
     const handleCancel = () => {
       router.push('/')
     }
 
+    // runs when the user submits the timer
     const handleSubmit = async () => {
+       // stores the timer's data in a variable
       let data = { 
         name: name.value,
         minutes: minutes.value,
         seconds: seconds.value,
       }
-      const res = await projectFirestore.collection('timers').add(data)
+      // takes the data for the new timer and stores it in the firestore database
+      await projectFirestore.collection('timers').add(data)
+      // redirects the user to the home page
       router.push('/')
+      // note: because the load() function runs during setup, the timers array will be updated automatically
+      // and the new timer will be displayed
     }
     return { handleCancel, handleSubmit, name, minutes, seconds}
   }

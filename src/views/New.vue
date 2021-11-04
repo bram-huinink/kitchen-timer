@@ -27,7 +27,6 @@ export default {
     const name = ref(null)
     const minutes = ref(null)
     const seconds = ref(null)
-    const isActive = ref(false)
     
     const router = useRouter()
 
@@ -40,12 +39,11 @@ export default {
         name: name.value,
         minutes: minutes.value,
         seconds: seconds.value,
-        isActive: isActive.value,
       }
       const res = await projectFirestore.collection('timers').add(data)
       router.push('/')
     }
-    return { handleCancel, handleSubmit, name, minutes, seconds, isActive }
+    return { handleCancel, handleSubmit, name, minutes, seconds}
   }
 }
 </script>

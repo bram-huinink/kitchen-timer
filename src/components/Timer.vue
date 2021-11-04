@@ -1,16 +1,16 @@
 <template>
-    <div class="timerBlock" :class="{ active: timer.isActive}">
+    <div class="timerBlock" :class="{ active: isActive}">
         <h2>{{ timer.name }}</h2>
         <div v-if="isAlarm">
             <p class='alarmText'>BEEP BEEP</p>
-            <button v-if="timer.isActive" @click="resetAlarm">Stop alarm</button>
+            <button v-if="isActive" @click="resetAlarm">Stop alarm</button>
         </div>
         <div v-else>
-            <p v-if="timer.isActive">Timer running:</p>
+            <p v-if="isActive">Timer running:</p>
             <p v-else-if="isPaused" >Timer paused:</p>
             <p v-else >Time:</p>
             <p class="time">{{ timer.minutes }}:{{ timer.seconds }}</p>
-            <div v-if="timer.isActive">
+            <div v-if="isActive">
                 <button @click="stopTimer">Stop timer</button>
                 <button @click="pauseTimer">Pause timer</button>
             </div>
@@ -48,74 +48,102 @@ export default {
         // bool for when the timer should be paused
         let isPaused = ref(false)
 
+        // bool for when the timer should be active
+        let isActive= ref(false)
+
 
         // alarm sound that loops
         let alarmSound = new Audio("https://www.mboxdrive.com/alarm_r.mp3")
         alarmSound.loop = true
 
+        // stores the original amount of minutes and seconds so that
+        // the time can be restored later.
         const originalMinutes = props.timer.minutes
         const originalSeconds = props.timer.seconds
 
+        // stops the timer
         const stopTimer = () => {
             clearInterval(interval)
+
+            // sets the pause state so that the function also works as a reset.
             isPaused.value = false
-            props.timer.isActive = false
+
+            // sets the bool to false so the program know what to display.
+            isActive.value = false
+
+            // restores the original time on display.
             props.timer.minutes = originalMinutes
             props.timer.seconds = originalSeconds
+
+            // restores the timer amount.
             timer = totalTime
 
+            // when the alarm is turned on, it should be turned off.
             if(isAlarm.value){
                 isAlarm.value = false
                 alarmSound.pause()
                 alarmSound.currentTime = 0
             }
-            console.log("timer gestopt")
         }
 
+        // pauses the timer
         const pauseTimer = () => {
-            props.timer.isActive = false
+            // sets the bool to false so the program will stop running the timer.
+            isActive.value = false
+
+            // set the bool to true so the program will know what to displays
             isPaused.value = true
             clearInterval(interval)
         }
 
 
+        // starts the timer
         const startTimer = () => {
+            // depauses the timer 
             isPaused.value = false
-            context.emit('start', props.timer.id)
-            props.timer.isActive = true
+
+            // sets bool to true so the program knows what to display
+            isActive.value = true
     
+            // puts interval on the variable
             interval = setInterval(() => {
-            if (timer === 0) {
-                clearInterval(interval)
-                console.log('timer klaar')                
-                isAlarm.value = true
-                alarmSound.play()
-            } else {
-                timer--
-                if(props.timer.seconds > 0) {
-                   props.timer.seconds-- 
+                // runs when timer runs out
+                if (timer === 0) {
+                    // clears the interval
+                    clearInterval(interval)
+                     // sets bool to true so the program knows what to display    
+                    isAlarm.value = true
+
+                    // plays the alarm sound
+                    alarmSound.play()
                 } else {
-                    props.timer.minutes-- 
-                    props.timer.seconds = 59
-                }
+                    // runs when the timer is still counting down
+                    timer--
+                    if(props.timer.seconds > 0) {
+                        // -1 on the displayed seconds 
+                        props.timer.seconds-- 
+                    } else {
+                        // when the seconds reach 0, -1 on the minutes and display 59 again
+                        props.timer.minutes-- 
+                        props.timer.seconds = 59
+                    }
                 console.log(timer)
             }      
-            }, 1000)
+            }, 1000) // the amount of milliseconds the program should wait for each interval (1 second)
         }
 
+
+        // deletes a timer
         const deleteTimer = async () => {
+            // takes the data from the firestore database and deletes it
             await projectFirestore.collection('timers')
             .doc(props.timer.id)
             .delete()
+            // after that, it will emit a custom event so the Timers component knows to delete the timer from the local data
             context.emit('delete', props.timer.id)
         }
 
-        const resetAlarm = () => {
-            stopTimer()
-            isAlarm.value = false;
-        }
-
-        return {deleteTimer, startTimer, stopTimer, isAlarm, isPaused, alarmSound, resetAlarm, pauseTimer}
+        return {deleteTimer, startTimer, stopTimer, isAlarm, isPaused, isActive, alarmSound, pauseTimer}
     }
 }
 

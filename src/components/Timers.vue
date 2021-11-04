@@ -67,7 +67,7 @@ export default {
             timerRefs.value.forEach((item) => {
                 // checks if the timer is active, if so it runs the method.
                 // this prevents that paused timers will be reset
-                if(item.timer.isActive) {
+                if(item.isActive) {
                     item.stopTimer()
                 }
             })
@@ -76,7 +76,7 @@ export default {
         // goes through the array with refs to call the startTimer method for each one
         const startAll = () => {
             timerRefs.value.forEach((item) => {
-                    if(!item.timer.isActive && item) {
+                    if(!item.isActive && item) {
                         item.startTimer()
                     }
             })
@@ -86,7 +86,7 @@ export default {
         const resetAll = () => {
             // goes through the array with refs to call the stopTimer method for each one
             timerRefs.value.forEach((item) => {
-                if(item.timer.isActive) {
+                if(item.isActive) {
                     item.stopTimer()
                 }
             })
